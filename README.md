@@ -103,6 +103,8 @@ I have created multiple sql scripts to create the necessary external file format
 
 Note: I have added the necessary credentials to ensure I can use the managed identity for the data factory linked service / dataset.
 
+Ref : https://www.madeiradata.com/post/external-tables-with-sql-user
+
 ```
 USE master
 CREATE login somename WITH PASSWORD =  '********'
@@ -160,7 +162,7 @@ CREATE EXTERNAL TABLE [dbo].[EmpMaster] (
 GO
 ```
 
-<img src="screenshots/synapse_create_tables.png" title="db schema" width="900">
+<img src="screenshots/synapse_create_tables2.png" title="db schema" width="900">
 
 ## Task 2 : Create Linked Services
 
