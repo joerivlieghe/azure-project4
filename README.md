@@ -101,6 +101,65 @@ GO
 
 I have created multiple sql scripts to create the necessary external file format, data sources and external tables.
 
+Note: I have added the necessary credentials to ensure I can use the managed identity for the data factory linked service / dataset.
+
+```
+USE master
+CREATE login somename WITH PASSWORD =  '********'
+
+USE [udacity-serverless]
+CREATE USER somename FOR LOGIN somename
+
+ALTER ROLE [db_datareader] ADD MEMBER [somename]
+```
+```
+-- 1.create a master key
+CREATE MASTER KEY ENCRYPTION BY PASSWORD ='*******'
+
+-- 2.create a database credential
+CREATE DATABASE SCOPED CREDENTIAL myCred
+WITH IDENTITY = 'Managed Identity'
+
+--3.Give the user permissions to the credential
+GRANT REFERENCES     
+    ON DATABASE SCOPED CREDENTIAL :: myCred  
+    TO [somename]
+```
+```
+GRANT REFERENCES ON CREDENTIAL::[myCred] TO [jvudacitydatafact];
+```
+```
+IF NOT EXISTS (SELECT * FROM sys.external_file_formats WHERE name = 'SynapseDelimitedTextFormat') 
+	CREATE EXTERNAL FILE FORMAT [SynapseDelimitedTextFormat] 
+	WITH ( FORMAT_TYPE = DELIMITEDTEXT ,
+	       FORMAT_OPTIONS (
+			 FIELD_TERMINATOR = ',',
+			 FIRST_ROW = 2,
+			 USE_TYPE_DEFAULT = FALSE
+			))
+GO
+
+IF NOT EXISTS (SELECT * FROM sys.external_data_sources WHERE name = 'adlsnycpayroll-joeri-v_udacityjvstorageacc_dfs_core_windows_net') 
+	CREATE EXTERNAL DATA SOURCE [adlsnycpayroll-joeri-v_udacityjvstorageacc_dfs_core_windows_net] 
+	WITH (
+		LOCATION = 'abfss://adlsnycpayroll-joeri-v@udacityjvstorageacc.dfs.core.windows.net',
+		CREDENTIAL = [mycred] 
+	)
+GO
+
+CREATE EXTERNAL TABLE [dbo].[EmpMaster] (
+	[EmployeeID] nvarchar(10),
+	[LastName] nvarchar(4000),
+	[FirstName] nvarchar(4000)
+	)
+	WITH (
+	LOCATION = 'dirpayrollfiles/EmpMaster.csv',
+	DATA_SOURCE = [adlsnycpayroll-joeri-v_udacityjvstorageacc_dfs_core_windows_net],
+	FILE_FORMAT = [SynapseDelimitedTextFormat]
+	)
+GO
+```
+
 <img src="screenshots/synapse_create_tables.png" title="db schema" width="900">
 
 ## Task 2 : Create Linked Services
@@ -114,8 +173,9 @@ I have created multiple sql scripts to create the necessary external file format
 <img src="screenshots/linked_sql.png" title="db schema" width="900">
 
 #### 3. Create a Linked Service for Synapse Analytics
+  I have assigned the "Managed identity name" for this and had to manually select the domain name for Synapse. See screenshot
 
-<img src="screenshots/linked_synapse.png" title="db schema" width="900">
+<img src="screenshots/linked_azure_synapse.png" title="db schema" width="900">
 
 ## Task 3 : Create Datasets
 
