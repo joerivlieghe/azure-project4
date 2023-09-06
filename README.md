@@ -193,3 +193,6 @@ GO
 
 #### 4. Create the datasets for destination (target) tables in Synapse Analytics
 
+<img src="screenshots/dataset_synapse.png" title="db schema" width="900">
+
+
