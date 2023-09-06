@@ -104,6 +104,7 @@ I have created multiple sql scripts to create the necessary external file format
 Note: I have added the necessary credentials to ensure I can use the managed identity for the data factory linked service / dataset.
 
 Ref : https://www.madeiradata.com/post/external-tables-with-sql-user
+https://sqlkover.com/read-data-from-azure-synapse-serverless-sql-pools-with-azure-data-factory/
 
 ```
 USE master
