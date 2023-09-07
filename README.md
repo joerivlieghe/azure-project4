@@ -196,4 +196,102 @@ GO
 
 <img src="screenshots/dataset_synapse.png" title="db schema" width="900">
 
+## Task 4 : Create Data Flows
 
+#### 1. In Azure Data Factory, create the data flow to load 2021 Payroll Data to SQL DB transaction table (in the future NYC will load all the transaction data into this table).
+
+<img src="screenshots/dataflow_csv_to_sql.png" title="db schema" width="900">
+
+#### 2. Create Pipeline to load 2021 Payroll data into transaction table in the SQL DB
+
+<img src="screenshots/pipeline_csv_to_sql.png" title="db schema" width="900">
+
+After manually triggering the pipeline this is the result:
+
+- The pipeline has run succesfully:
+- <img src="screenshots/pipeline_csv_to_sql_run.png" title="db schema" width="900">
+
+- The data is loaded into the SQL database:
+- <img src="screenshots/pipeline_csv_to_sql_table.png" title="db schema" width="900">
+
+#### 3. Create data flows to load the data from the data lake files into the Synapse Analytics data tables
+
+3 data flows were created for this: 
+- df_titlemaster_csv_to_synapse
+- df_empmaster_csv_to_synapse
+- df_agencymaster_csv_to_synapse
+<img src="screenshots/dataflow_csv_to_synapse.png" title="db schema" width="900">
+
+#### 4. Create a data flow to load 2021 data from SQL DB to Synapse Analytics
+<img src="screenshots/dataflow_sql_to_synapse.png" title="db schema" width="900">
+
+#### 5. Create pipelines for Employee, Title, Agency, and year 2021 Payroll transaction data to Synapse Analytics containing the data flows.
+
+I created 4 pipelines for this:
+- pipeline_agencymaster_csv_to_synapse
+- pipeline_empmaster_csv_to_synapse
+- pipeline_titlemaster_csv_to_synapse
+- pipeline_payroll_sql_to_synapse
+
+All 4 pipelines did not run. The reason for this is that the project rubric expects this to run on SQL dedicated in Synapse. In Synapse I have created external tables which already load in the data from the CSV files, so the step using dataflow and pipeline to sink the CSV data into the database table is not necessary.
+
+```
+Operation on target Data flow1 failed: {"StatusCode":"DF-SQLDW-IncorrectLinkedServiceConfiguration","Message":"Job failed due to reason: at Sink 'sink1': The linked service is incorrectly configured as type 'Azure Synapse Analytics' instead of 'Azure SQL Database'. Please create a new linked service of type 'Azure SQL Database' \n Note: Please check that the given database is of type 'Dedicated SQL pool (formerly SQL DW)' for linked service type 'Azure Synapse Analytics'. ","Details":"shaded.msdataflow.com.microsoft.sqlserver.jdbc.SQLServerException: Incorrect syntax near 'HEAP'.\n\tat shaded.msdataflow.com.microsoft.sqlserver.jdbc.SQLServerException.makeFromDatabaseError(SQLServerException.java:265)\n\tat shaded.msdataflow.com.microsoft.sqlserver.jdbc.SQLServerStatement.getNextResult(SQLServerStatement.java:1673)\n\tat shaded.msdataflow.com.microsoft.sqlserver.jdbc.SQLServerStatement.doExecuteStatement(SQLServerStatement.java:907)\n\tat shaded.msdataflow.com.microsoft.sqlserver.jdbc.SQLServerStatement$StmtExecCmd.doExecute(SQLServerStatement.java:802)\n\tat shaded.msdataflow.com.microsoft.sqlserver.jdbc.TDSCommand.execute(IOBuffer.java:7627)\n\tat shaded.msdataflow.com.microsoft.sqlserver.jdbc.SQLServerConnection.executeCommand(SQLServerConnection.java:3912)\n\tat shaded.msdataflow.com.microsoft.sqlserver.jdbc.SQLServerStatement.executeCommand(SQLServerStatement.java:268)\n\tat shaded.msdataflow.com.microsoft.sqlserver.jdbc.SQLServerStatement.executeStatement(SQLServerStatement.java:242)\n\tat shaded.msdat"}
+```
+<img src="screenshots/pipeline_faield.png" title="db schema" width="900">
+<img src="screenshots/pipeline_error.png" title="db schema" width="900">
+
+## Task 5 : Data Aggregation and Parameterization
+
+#### 1.Create a Summary table in Synapse with the following SQL script and create a dataset named table_synapse_nycpayroll_summary
+
+Since I do not have a dedicated SQL server on the Synapse platform, I have chosen to create the table on the Azure SQL database.
+
+<img src="screenshots/summary_sql.png" title="db schema" width="900">
+
+#### 2.Create a new dataset for the Azure Data Lake Gen2 folder that contains the historical files.
+
+<img src="screenshots/dataset_history_files.png" title="db schema" width="900">
+
+#### 3.Create new data flow and name it Dataflow Aggregate Data
+- Create a data flow level parameter for Fiscal Year
+- Add first Source for table_sqldb_nyc_payroll_data table
+- Add second Source for the Azure Data Lake history folder
+#### 4.Create a new Union activity in the data flow and Union with history files
+
+#### 5.Add a Filter activity after Union
+
+In Expression Builder, enter toInteger(FiscalYear) >= $dataflow_param_fiscalyear
+#### 6.Derive a new TotalPaid column
+
+In Expression Builder, enter RegularGrossPaid + TotalOTPaid+TotalOtherPay
+#### 7.Add an Aggregate activity to the data flow next to the TotalPaid activity
+
+Under Group By, Select AgencyName and Fiscal Year
+#### 8.Add a Sink activity to the Data Flow
+
+Select the dataset to target (sink) the data into the Synapse Analytics Payroll Summary table.
+In Settings, select Truncate Table
+
+Following all these steps, the dataflow was created:
+
+<img src="screenshots/dataflow_aggregate.png" title="db schema" width="900">
+
+#### 9.Create a new Pipeline and add the Aggregate data flow
+
+Create a new Global Parameter (This will be the Parameter at the global pipeline level that will be passed on to the data flow
+In Parameters, select Pipeline Expression
+Choose the parameter created at the Pipeline level
+
+<img src="screenshots/pipeline_aggregate.png" title="db schema" width="900">
+#### 10.Validate, Publish and Trigger the pipeline. Enter the desired value for the parameter.
+
+#### 11.Monitor the Pipeline run and take a screenshot of the finished pipeline run.
+
+The global parameter was set to fiscal year 2020. Since the filter expression evaluates on >= it will show the totalpaid for 2020 and 2021.
+
+Pipeline run finished succesfully:
+<img src="screenshots/pipeline_aggregate_run.png" title="db schema" width="900">
+
+The data in the SQL summary table looks OK:
+<img src="screenshots/pipeline_aggregate_table.png" title="db schema" width="900">
