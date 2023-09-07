@@ -1,0 +1,27 @@
+{
+	"name": "ds_synapse_agencymaster",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSynapseAnalytics1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlDWTable",
+		"schema": [
+			{
+				"name": "AgencyID",
+				"type": "bigint",
+				"precision": 19
+			},
+			{
+				"name": "AgencyName",
+				"type": "nvarchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "AgencyMaster"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

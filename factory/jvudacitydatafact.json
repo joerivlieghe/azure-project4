@@ -1,0 +1,17 @@
+{
+	"name": "jvudacitydatafact",
+	"properties": {
+		"globalParameters": {
+			"fiscalyear": {
+				"type": "int",
+				"value": 2020
+			}
+		}
+	},
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "3d902d74-2a77-44b6-b6b3-ea39730eb708",
+		"tenantId": "12409e98-3746-478c-aa45-65ec9a08d9db"
+	}
+}
