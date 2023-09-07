@@ -295,3 +295,9 @@ Pipeline run finished succesfully:
 
 The data in the SQL summary table looks OK:
 <img src="screenshots/pipeline_aggregate_table.png" title="db schema" width="900">
+
+#### Task 6 : Power Query
+
+For fun I also tried using Power Query, I applied a filter on fiscal year and changed the totalpaid column to type currency.
+<img src="screenshots/powerquery.png" title="db schema" width="900">
+
